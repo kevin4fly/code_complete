@@ -71,9 +71,10 @@ if !exists("g:re")
     let g:re = '>`'    "region stop
 endif
 
-if !exists("g:user_defined_snippets")
-    let g:user_defined_snippets = "$VIMRUNTIME/plugin/my_snippets.vim"
-endif
+" NO snippets related code needed
+"if !exists("g:user_defined_snippets")
+"    let g:user_defined_snippets = "$VIMRUNTIME/plugin/my_snippets.vim"
+"endif
 
 " ----------------------------
 let s:expanded = 0  "in case of inserting char after expand
@@ -82,7 +83,7 @@ let s:jumppos = -1
 let s:doappend = 1
 
 " Autocommands: {{{1
-autocmd BufReadPost,BufNewFile * call CodeCompleteStart()
+"autocmd BufReadPost,BufNewFile * call CodeCompleteStart()
 
 " Menus:
 menu <silent>       &Tools.Code\ Complete\ Start          :call CodeCompleteStart()<CR>
@@ -158,20 +159,21 @@ function! FunctionComplete(fun)
     endif
 endfunction
 
-function! ExpandTemplate(cword)
-    "let cword = substitute(getline('.')[:(col('.')-2)],'\zs.*\W\ze\w*$','','g')
-    if has_key(g:template,&ft)
-        if has_key(g:template[&ft],a:cword)
-            let s:jumppos = line('.')
-            return "\<c-w>" . g:template[&ft][a:cword]
-        endif
-    endif
-    if has_key(g:template['_'],a:cword)
-        let s:jumppos = line('.')
-        return "\<c-w>" . g:template['_'][a:cword]
-    endif
-    return ''
-endfunction
+" NO snippets related code needed
+"function! ExpandTemplate(cword)
+"    "let cword = substitute(getline('.')[:(col('.')-2)],'\zs.*\W\ze\w*$','','g')
+"    if has_key(g:template,&ft)
+"        if has_key(g:template[&ft],a:cword)
+"            let s:jumppos = line('.')
+"            return "\<c-w>" . g:template[&ft][a:cword]
+"        endif
+"    endif
+"    if has_key(g:template['_'],a:cword)
+"        let s:jumppos = line('.')
+"        return "\<c-w>" . g:template['_'][a:cword]
+"    endif
+"    return ''
+"endfunction
 
 function! SwitchRegion()
     if len(s:signature_list)>1
@@ -210,68 +212,18 @@ function! CodeComplete()
             let s:doappend = 0
         endif
         return funcres
-    else
-        let template_name = substitute(getline('.')[:(col('.')-2)],'\zs.*\W\ze\w*$','','g')
-        let tempres = ExpandTemplate(template_name)
-        if tempres != ''
-            let s:doappend = 0
-        endif
-        return tempres
+" we comment there out since, for code snippets completion, we use
+" ultisnips plugin instead.
+"    else
+"        let template_name = substitute(getline('.')[:(col('.')-2)],'\zs.*\W\ze\w*$','','g')
+"        let tempres = ExpandTemplate(template_name)
+"        if tempres != ''
+"            let s:doappend = 0
+"        endif
+"        return tempres
+   else
+       return ''
     endif
 endfunction
-
-
-" [Get converted file name like __THIS_FILE__ ]
-function! GetFileName()
-    let filename=expand("%:t")
-    let filename=toupper(filename)
-    let _name=substitute(filename,'\.','_',"g")
-    "let _name="__"._name."__"
-    return _name
-endfunction
-
-" Templates: {{{1
-" to add templates for new file type, see below
-"
-" "some new file type
-" let g:template['newft'] = {}
-" let g:template['newft']['keyword'] = "some abbrevation"
-" let g:template['newft']['anotherkeyword'] = "another abbrevation"
-" ...
-"
-" ---------------------------------------------
-" C templates
-let g:template = {}
-let g:template['c'] = {}
-let g:template['c']['cc'] = "/*  */\<left>\<left>\<left>"
-let g:template['c']['cd'] = "/**<  */\<left>\<left>\<left>"
-let g:template['c']['de'] = "#define     "
-let g:template['c']['in'] = "#include    \"\"\<left>"
-let g:template['c']['is'] = "#include  <>\<left>"
-let g:template['c']['ff'] = "#ifndef  \<c-r>=GetFileName()\<cr>\<CR>#define  \<c-r>=GetFileName()\<cr>".
-            \repeat("\<cr>",5)."#endif  /*\<c-r>=GetFileName()\<cr>*/".repeat("\<up>",3)
-let g:template['c']['for'] = "for( ".g:rs."...".g:re." ; ".g:rs."...".g:re." ; ".g:rs."...".g:re." )\<cr>{\<cr>".
-            \g:rs."...".g:re."\<cr>}\<cr>"
-let g:template['c']['main'] = "int main(int argc, char \*argv\[\])\<cr>{\<cr>".g:rs."...".g:re."\<cr>}"
-let g:template['c']['switch'] = "switch ( ".g:rs."...".g:re." )\<cr>{\<cr>case ".g:rs."...".g:re." :\<cr>break;\<cr>case ".
-            \g:rs."...".g:re." :\<cr>break;\<cr>default :\<cr>break;\<cr>}"
-let g:template['c']['if'] = "if( ".g:rs."...".g:re." )\<cr>{\<cr>".g:rs."...".g:re."\<cr>}"
-let g:template['c']['while'] = "while( ".g:rs."...".g:re." )\<cr>{\<cr>".g:rs."...".g:re."\<cr>}"
-let g:template['c']['ife'] = "if( ".g:rs."...".g:re." )\<cr>{\<cr>".g:rs."...".g:re."\<cr>} else\<cr>{\<cr>".g:rs."...".
-            \g:re."\<cr>}"
-
-" ---------------------------------------------
-" C++ templates
-let g:template['cpp'] = g:template['c']
-
-" ---------------------------------------------
-" common templates
-let g:template['_'] = {}
-let g:template['_']['xt'] = "\<c-r>=strftime(\"%Y-%m-%d %H:%M:%S\")\<cr>"
-
-" ---------------------------------------------
-" load user defined snippets
-exec "silent! runtime ".g:user_defined_snippets
-
 
 " vim: set fdm=marker et :
